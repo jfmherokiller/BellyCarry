@@ -315,3 +315,9 @@ game. Use it on both instances before a clean regression run.
 Distance-based KrokMP detach is allowed to proceed normally; only jump-triggered
 stops are suppressed. Client detach handling marks distance/death releases as
 suppressed too, preventing delayed sync packets from pulling the passenger back in.
+# Current verified state
+
+The interaction menu has a dedicated **Vore** action beneath the native
+Carry/Piggyback/Push row. As of the `c6a2d5e` build, host-to-client and
+client-to-host Vore requests, release with H, and deliberate re-consumption
+after release have been verified in the two-instance local setup.
