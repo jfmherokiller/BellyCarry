@@ -47,6 +47,15 @@ namespace CasualtiesUnknown.BellyCarry
                 // H/release installs a short stale-packet guard. A deliberate
                 // click on Vore is fresh intent and must be allowed through it.
                 BellyCarryState.ReleaseSuppressUntil.Remove((ushort)passenger.netId);
+                // A client cannot authoritatively attach a server-owned body
+                // by calling StartPiggyback directly. Use KrokMP's existing
+                // request helper for that direction; the StartPiggyback hook
+                // will publish the BellyCarry state after confirmation.
+                if (!Net.is_server && !passenger.is_local)
+                {
+                    ClientMain._PLRINT_Carry(passenger);
+                    return;
+                }
                 if (passenger.StartPiggyback(carrier, check_distance: true, force: true))
                     BellyNet.SendGrab((ushort)carrier.netId, (ushort)passenger.netId, active: true);
                 else
