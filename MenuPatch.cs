@@ -53,7 +53,7 @@ namespace CasualtiesUnknown.BellyCarry
                 // will publish the BellyCarry state after confirmation.
                 if (!Net.is_server && !passenger.is_local)
                 {
-                    ClientMain._PLRINT_Carry(passenger);
+                    BellyNet.SendVoreRequest((ushort)passenger.netId);
                     return;
                 }
                 if (passenger.StartPiggyback(carrier, check_distance: true, force: true))

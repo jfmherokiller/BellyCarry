@@ -16,6 +16,7 @@ namespace CasualtiesUnknown.BellyCarry
     {
         public const ushort MsgGrab = 28777;      // outside KrokMP (10xxx) and Consumed (29xxx)
         public const ushort MsgStruggle = 28778;
+        public const ushort MsgVoreRequest = 28779;
         private static bool _registered;
 
         public static void EnsureRegistered()
@@ -28,6 +29,7 @@ namespace CasualtiesUnknown.BellyCarry
                 {
                     ServerMain.RegisterServerReceiver(MsgGrab, OnServerGrab);
                     ServerMain.RegisterServerReceiver(MsgStruggle, OnServerStruggle);
+                    ServerMain.RegisterServerReceiver(MsgVoreRequest, OnServerVoreRequest);
                 }
                 else
                 {
@@ -41,6 +43,25 @@ namespace CasualtiesUnknown.BellyCarry
                 _registered = false;
                 Plugin.Logger.LogWarning($"BellyCarry net register failed: {e.Message}");
             }
+        }
+
+        public static void SendVoreRequest(ushort passenger)
+        {
+            if (Net.is_server) return;
+            var w = Net.CreateWriter(MsgVoreRequest);
+            w.Put(passenger);
+            Net.Client_Send(DeliveryMethod.ReliableOrdered, w);
+        }
+
+        private static void OnServerVoreRequest(knetid sender, ref NetDataReader r)
+        {
+            ushort passengerId = r.GetUShort();
+            if (!NetPlayer.TryGetNetPlayerAndNetBodyFromClientId(sender, out var plr, out var carrier)) return;
+            var passenger = BellyCarryState.Resolve(passengerId);
+            if (passenger == null || carrier == null || passenger == carrier || !plr.body.conscious) return;
+            if (passenger.carrying_person != null || passenger.piggybacking_on != null) return;
+            if (passenger.StartPiggyback(carrier, check_distance: true, force: true))
+                SendGrab((ushort)carrier.netId, passengerId, active: true);
         }
 
         // ---- grab / release ---------------------------------------------------
