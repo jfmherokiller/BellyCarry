@@ -75,7 +75,12 @@ namespace CasualtiesUnknown.BellyCarry
         {
             var w = Net.CreateWriter(MsgGrab);
             w.Put(carrier); w.Put(passenger); w.Put(active);
-            Net.Server_SendToClientsVeryReliable(in w, (System.Collections.Generic.IEnumerable<knetid>)ServerMain.AllClientIds);
+            // The VeryReliable wrapper enters the Steam transport adapter in
+            // some builds and can throw while converting the client-id list.
+            // ReliableOrdered is sufficient for these idempotent state
+            // transitions and uses the same path as the working struggle
+            // messages.
+            Net.Server_SendToClients(DeliveryMethod.ReliableOrdered, in w, ServerMain.AllClientIds);
         }
 
         public static void ResyncActive()
