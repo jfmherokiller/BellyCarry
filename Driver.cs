@@ -27,7 +27,10 @@ namespace CasualtiesUnknown.BellyCarry
             _hb -= Time.unscaledDeltaTime;
             if (_hb <= 0f)
             {
-                _hb = 3f;
+                // Re-send active state frequently enough to repair a missed
+                // transition (especially when re-consuming the same player).
+                // The message is idempotent and ReliableOrdered.
+                _hb = 0.5f;
                 BellyNet.ResyncActive();
                 var me = BellyCarryState.LocalNetBody();
                 Diag.Log($"heartbeat: is_server={Net.is_server} localNetId={(me == null ? "null" : ((ushort)me.netId).ToString())} "
